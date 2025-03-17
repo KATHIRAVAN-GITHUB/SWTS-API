@@ -1,0 +1,18 @@
+name: Keep Render Alive
+
+on:
+  schedule:
+    - cron: "*/5 * * * *"  # Runs every 5 minutes
+  workflow_dispatch:  # Allows manual trigger
+
+jobs:
+  keep_alive:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Ping Render API with retries
+        run: |
+          for i in {1..3}; do
+            RESPONSE=$(curl -m 5 -s -o /dev/null -w "%{http_code}" https://titan-api-ffre.onrender.com)
+            echo "API Response: $RESPONSE"
+            [ "$RESPONSE" -eq 200 ] && break || sleep 5
+          done
